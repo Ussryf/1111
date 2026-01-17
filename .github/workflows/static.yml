@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>上下滑动烫金生日邀请函</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: #f5f0e1;
+            color: #8b7355;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            position: relative;
+        }
+        
+        /* 背景图片 */
+        .background-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: -1;
+            filter: brightness(0.9) sepia(0.2);
+        }
+        
+        /* 背景遮罩层 */
+        .background-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(245, 240, 225, 0.6);
+            z-index: -1;
+        }
+        
+        .invitation-container {
+            width: 100%;
+            max-width: 450px;
+            height: 90vh;
+            background: rgba(255, 253, 248, 0.5);
+            border-radius: 25px;
+            box-shadow: 0 15px 40px rgba(139, 115, 85, 0.25),
+                        0 0 0 1px rgba(212, 175, 55, 0.15);
+            overflow: hidden;
+            position: relative;
+            padding: 15px;
+            backdrop-filter: blur(8px);
+        }
+        
+        /* 烫金纹理背景 */
+        .gold-texture {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://www.transparenttextures.com/patterns/light-paper.png');
+            opacity: 0.5;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        /* 烫金边框装饰 */
+        .border-decoration {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+        
+        .border-decoration::before, .border-decoration::after {
+            content: '';
+            position: absolute;
+            background: linear-gradient(45deg, transparent, #d4af37, transparent);
+            opacity: 0.25;
+        }
+        
+        .border-decoration::before {
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #d4af37, transparent);
+        }
+        
+        .border-decoration::after {
+            bottom: 15px;
+            left: 15px;
+            right: 15px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #d4af37, transparent);
+        }
+        
+        /* 上下滑动容器 */
+        .vertical-swiper {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            z-index: 3;
+            overflow: hidden;
+            border-radius: 20px;
+        }
+        
+        .pages-container {
+            width: 100%;
+            height: 600%;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+        
+        .page {
+            width: 100%;
+            height: 16.666%;
+            padding: 30px 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        /* 内容卡片样式 - 每页一个卡片 */
+        .page-card {
+            width: 100%;
+            max-width: 380px;
+            min-height: 400px;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 25px;
+            padding: 40px 35px;
+            box-shadow: 0 15px 35px rgba(139, 115, 85, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            animation: cardAppear 0.8s ease-out;
+        }
+        
+        @keyframes cardAppear {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px) scale(0.95); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            }
+        }
+        
+        .page-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 253, 248, 0.4) 0%, rgba(248, 242, 230, 0.4) 100%);
+            z-index: -1;
+        }
+        
+        /* 卡片装饰元素 */
+        .card-decoration {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .card-decoration-top {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent);
+        }
+        
+        .card-decoration-bottom {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent);
+        }
+        
+        /* 卡片内容样式 */
+        .card-icon {
+            font-size: 4rem;
+            color: #d4af37;
+            margin-bottom: 25px;
+            animation: float 3s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .card-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #b8941f, #d4af37);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 4px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .card-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #d4af37, transparent);
+        }
+        
+        .card-content {
+            font-size: 1.1rem;
+            line-height: 1.9;
+            color: #7a6343;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .card-content p {
+            margin-bottom: 15px;
+        }
+        
+        /* 透明地图样式 */
+        .map-container {
+            width: 100%;
+            height: 180px;
+            margin: 20px 0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(3px);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+        }
+        
+        .map-background {
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 253, 248, 0.6);
+            position: relative;
+        }
+        
+        .map-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(184, 148, 31, 0.05) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .map-icon {
+            font-size: 2.5rem;
+            color: #d4af37;
+            margin-bottom: 15px;
+        }
+        
+        .map-text {
+            color: #8b7355;
+            font-size: 1.1rem;
+            text-align: center;
+            line-height: 1.6;
+        }
+        
+        .map-address {
+            color: #b8941f;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        /* 特殊卡片样式 */
+        .cover-card {
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        .cover-gold-circle {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.05) 70%);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse 4s infinite ease-in-out;
+            z-index: -1;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.05); }
+        }
+        
+        .cover-title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            background: linear-gradient(to right, #b8941f, #d4af37, #b8941f);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+            letter-spacing: 8px;
+            position: relative;
+            z-index: 2;
+            animation: shimmer 3s infinite linear;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -100% center; }
+            100% { background-position: 200% center; }
+        }
+        
+        .cover-subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            color: #8b7355;
+            letter-spacing: 3px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .cover-divider {
+            width: 160px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #d4af37, transparent);
+            margin: 20px 0;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .cover-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #8b7355;
+            max-width: 320px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* 故事卡片特殊样式 */
+        .story-card .card-content {
+            font-style: italic;
+            text-align: justify;
+            line-height: 1.8;
+        }
+        
+        .story-card .card-content::first-letter {
+            font-size: 2.5rem;
+            color: #d4af37;
+            font-weight: bold;
+            float: left;
+            line-height: 1;
+            margin-right: 8px;
+            margin-top: 5px;
+        }
+        
+        /* 感谢卡片特殊样式 */
+        .thanks-card .card-content {
+            font-style: italic;
+            line-height: 1.9;
+            text-align: justify;
+        }
+        
+        .thanks-signature {
+            text-align: right;
+            font-size: 1.3rem;
+            color: #b8941f;
+            font-style: italic;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px dashed rgba(212, 175, 55, 0.3);
+            width: 100%;
+        }
+        
+        /* 按钮样式 */
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .gold-btn {
+            padding: 14px 30px;
+            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.05rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        
+        .gold-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
+        }
+        
+        .gold-btn:active {
+            transform: translateY(0);
+        }
+        
+        .gold-btn i {
+            margin-left: 8px;
+            transition: transform 0.3s ease;
+        }
+        
+        .gold-btn:hover i {
+            transform: translateX(5px);
+        }
+        
+        /* 滑动提示 */
+        .swipe-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: #b8941f;
+            font-size: 0.9rem;
+            z-index: 10;
+            animation: bounce 2s infinite ease-in-out;
+            opacity: 0.8;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .swipe-hint i {
+            margin-left: 5px;
+        }
+        
+        /* 上下滑动提示 */
+        .vertical-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: #b8941f;
+            font-size: 0.9rem;
+            z-index: 10;
+            animation: bounceVertical 2s infinite ease-in-out;
+            opacity: 0.8;
+        }
+        
+        @keyframes bounceVertical {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* 页面指示器 - 垂直版 */
+        .vertical-indicator {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        .vertical-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: rgba(212, 175, 55, 0.3);
+            margin: 8px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .vertical-dot.active {
+            background-color: #d4af37;
+            transform: scale(1.2);
+        }
+        
+        /* 页面切换动画 */
+        .page {
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        .page.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .page.inactive {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        /* 新增：音乐控制按钮样式 */
+        .music-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(212, 175, 55, 0.8);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .music-control:hover {
+            background: rgba(212, 175, 55, 1);
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+        }
+        
+        .music-control.playing {
+            animation: pulseMusic 2s infinite;
+        }
+        
+        @keyframes pulseMusic {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 500px) {
+            .invitation-container {
+                height: 95vh;
+                max-width: 95%;
+                padding: 10px;
+            }
+            
+            .page {
+                padding: 25px 20px;
+            }
+            
+            .page-card {
+                padding: 35px 25px;
+                min-height: 380px;
+            }
+            
+            .cover-title {
+                font-size: 2.5rem;
+                letter-spacing: 6px;
+            }
+            
+            .card-title {
+                font-size: 1.8rem;
+            }
+            
+            .card-content {
+                font-size: 1.05rem;
+            }
+            
+            .map-container {
+                height: 150px;
+            }
+            
+            .vertical-indicator {
+                right: 10px;
+            }
+            
+            .music-control {
+                top: 15px;
+                right: 15px;
+                width: 45px;
+                height: 45px;
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景音乐 -->
+    <audio id="backgroundMusic" loop preload="auto" style="display: none;">
+        <source src="https://assets.mixkit.co/music/preview/mixkit-happy-birthday-to-you-443.mp3" type="audio/mpeg">
+        <source src="https://assets.mixkit.co/music/preview/mixkit-happy-birthday-to-you-443.wav" type="audio/wav">
+        您的浏览器不支持音频播放
+    </audio>
+    
+    <!-- 音乐控制按钮 -->
+    <div class="music-control" id="musicControl">
+        <i class="fas fa-play"></i>
+    </div>
+    
+    <div class="background-image"></div>
+    <div class="background-overlay"></div>
+    
+    <div class="invitation-container">
+        <div class="gold-texture"></div>
+        <div class="border-decoration"></div>
+        
+        <div class="vertical-swiper">
+            <div class="pages-container" id="pagesContainer">
+                <!-- 第1页：封面 -->
+                <div class="page active">
+                    <div class="page-card cover-card">
+                        <div class="cover-gold-circle"></div>
+                        <div class="card-decoration">
+                            <div class="card-decoration-top"></div>
+                            <div class="card-decoration-bottom"></div>
+                        </div>
+                        <h1 class="cover-title">邀请函</h1>
+                        <div class="cover-divider"></div>
+                        <p class="cover-subtitle">BIRTHDAY INVITATION</p>
+                        <div class="cover-text">
+                            诚挚邀请您参加<br>
+                            爱女的15岁生日盛宴<br>
+                            共度温馨美好时光
+                        </div>
+                        
+                        <div class="btn-container" style="margin-top: 40px; position: relative; z-index: 2;">
+                            <button class="gold-btn" id="openInvitation">
+                                开启邀请函 <i class="fas fa-gift"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 第2页：活动时间 -->
+                <div class="page inactive">
+                    <div class="page-card">
+                        <div class="card-decoration">
+                            <div class="card-decoration-top"></div>
+                            <div class="card-decoration-bottom"></div>
+                        </div>
+                        <div class="card-icon">
+                            <i class="far fa-calendar-alt"></i>
+                        </div>
+                        <h2 class="card-title">宴请时间</h2>
+                        <div class="card-content">
+                            <p><strong>2026年2月8日</strong></p>
+                            <p>星期日</p>
+                            <div style="margin: 25px 0; width: 100px; height: 1px; background: rgba(212, 175, 55, 0.3); margin-left: auto; margin-right: auto;"></div>
+                            <p><strong>温馨午宴</strong></p>
+                            <p>12:00 - 14:30</p>
+                         </div>
+                    </div>
+                </div>
+                
+                <!-- 第3页：活动地点 - 透明地图 -->
+                <div class="page inactive">
+                    <div class="page-card">
+                        <div class="card-decoration">
+                            <div class="card-decoration-top"></div>
+                            <div class="card-decoration-bottom"></div>
+                        </div>
+                        <div class="card-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <h2 class="card-title">活动地点</h2>
+                        
+                        <!-- 透明地图 -->
+                        <div class="map-container">
+                            <div class="map-background">
+                                <div class="map-overlay">
+                                    <div class="map-icon">
+                                        <i class="fas fa-map-signs"></i>
+                                    </div>
+                                    <div class="map-text">
+                                        <p><strong>南湖酒家</strong></p>
+                                        <p class="map-address">大南湖社区</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-content">
+                             <p>地点：汉寿县大南湖社区 南湖酒家 </p>
+                            <p style="margin-top: 15px; font-size: 0.95rem; color: #b8941f;">
+                                <i class="fas fa-car" style="margin-right: 8px;"></i>免费停车服务
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 第4页：关于寿星 -->
+                <div class="page inactive">
+                    <div class="page-card story-card">
+                        <div class="card-decoration">
+                            <div class="card-decoration-top"></div>
+                            <div class="card-decoration-bottom"></div>
+                        </div>
+                        <div class="card-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <h2 class="card-title">关于寿星</h2>
+                        <div class="card-content">
+                           今天是我女儿施雯静的15岁生日，看着眼前这个亭亭玉立、眼里有光的姑娘，真不敢相信，那个当年攥着我的手指学走路、睡前缠着我讲绘本的小不点，已经长成了如今这般温柔又坚韧的模样。
+                            <br><br>
+                            她的善良、乐观，还有骨子里那股不服输的韧劲，一直是我和妈妈最大的骄傲。今天，爸爸想对你说：愿你永远保持这份纯粹与热爱，在未来的日子里，被世界温柔以待，勇敢去追逐所有你想要的美好。生日快乐，我的小公主！
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 第5页：温馨提示 -->
+                <div class="page inactive">
+                    <div class="page-card">
+                        <div class="card-decoration">
+                            <div class="card-decoration-top"></div>
+                            <div class="card-decoration-bottom"></div>
+                        </div>
+                        <div class="card-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <h2 class="card-title">温馨提示</h2>
+                        <div class="card-content">
+                       <p>• 请携带家眷，准时出席，共享欢乐时光</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 第6页：感谢语 -->
+                <div class="page inactive">
+                    <div class="page-card thanks-card">
+                        <div class="card-decoration">
+                            <div class="card-decoration-top"></div>
+                            <div class="card-decoration-bottom"></div>
+                        </div>
+                        <div class="card-icon">
+                            <i class="fas fa-hands"></i>
+                        </div>
+                        <h2 class="card-title">衷心感谢</h2>
+                        <div class="card-content">
+                            感谢每一位朋友的到来，你们的陪伴是给静静最好的生日礼物。
+                            <br><br>
+                            在这个特别的日子里，能与你们共享欢乐时光，是我们最珍贵的回忆。
+                            <br><br>
+                            愿这份友谊如美酒般醇香，岁月愈久，情谊愈浓。
+                            <div class="thanks-signature">
+                                —— 邀请团队 敬上
+                            </div>
+                        </div>
+                        
+                        <div class="btn-container">
+                            <button class="gold-btn" id="confirmBtn">
+                                确认出席 <i class="fas fa-check-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="vertical-hint" id="verticalHint">
+                上下滑动 <i class="fas fa-arrows-alt-v"></i>
+            </div>
+            
+            <div class="vertical-indicator">
+                <div class="vertical-dot active" id="dot1"></div>
+                <div class="vertical-dot" id="dot2"></div>
+                <div class="vertical-dot" id="dot3"></div>
+                <div class="vertical-dot" id="dot4"></div>
+                <div class="vertical-dot" id="dot5"></div>
+                <div class="vertical-dot" id="dot6"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 背景音乐控制
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const musicControl = document.getElementById('musicControl');
+        let isMusicPlaying = false;
+        
+        // 设置音乐音量（0.0 - 1.0）
+        backgroundMusic.volume = 0.3;
+        
+        // 音乐控制按钮点击事件
+        musicControl.addEventListener('click', function() {
+            if (isMusicPlaying) {
+                // 暂停音乐
+                backgroundMusic.pause();
+                musicControl.classList.remove('playing');
+                musicControl.innerHTML = '<i class="fas fa-play"></i>';
+            } else {
+                // 播放音乐
+                backgroundMusic.play().then(() => {
+                    musicControl.classList.add('playing');
+                    musicControl.innerHTML = '<i class="fas fa-volume-up"></i>';
+                }).catch(error => {
+                    console.log('播放音乐失败，需要用户交互');
+                    // 如果自动播放失败，显示提示
+                    musicControl.innerHTML = '<i class="fas fa-play"></i>';
+                    alert('请点击播放按钮开始音乐');
+                });
+            }
+            isMusicPlaying = !isMusicPlaying;
+        });
+        
+        // 自动尝试播放音乐（现代浏览器需要用户交互后才能播放）
+        document.addEventListener('DOMContentLoaded', function() {
+            // 延迟尝试播放
+            setTimeout(() => {
+                backgroundMusic.play().then(() => {
+                    isMusicPlaying = true;
+                    musicControl.classList.add('playing');
+                    musicControl.innerHTML = '<i class="fas fa-volume-up"></i>';
+                }).catch(error => {
+                    // 自动播放被阻止，等待用户交互
+                    console.log('等待用户交互以播放音乐');
+                    musicControl.innerHTML = '<i class="fas fa-play"></i>';
+                    
+                    // 当用户第一次点击任何地方时尝试播放
+                    const playOnInteraction = () => {
+                        backgroundMusic.play().then(() => {
+                            isMusicPlaying = true;
+                            musicControl.classList.add('playing');
+                            musicControl.innerHTML = '<i class="fas fa-volume-up"></i>';
+                        });
+                        document.removeEventListener('click', playOnInteraction);
+                        document.removeEventListener('touchstart', playOnInteraction);
+                    };
+                    
+                    document.addEventListener('click', playOnInteraction);
+                    document.addEventListener('touchstart', playOnInteraction);
+                });
+            }, 1000);
+        });
+        
+        // 获取DOM元素
+        const pagesContainer = document.getElementById('pagesContainer');
+        const pageElements = document.querySelectorAll('.page');
+        const openInvitationBtn = document.getElementById('openInvitation');
+        const verticalHint = document.getElementById('verticalHint');
+        const dots = document.querySelectorAll('.vertical-dot');
+        const confirmBtn = document.getElementById('confirmBtn');
+        
+        const totalPages = 6;
+        let currentPage = 0;
+        let isAnimating = false;
+        let startY = 0;
+        let endY = 0;
+        
+        // 更新指示器
+        function updateIndicator() {
+            dots.forEach((dot, index) => {
+                if (index === currentPage) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+            
+            // 更新滑动提示
+            if (currentPage === 0) {
+                verticalHint.style.opacity = '0.8';
+                verticalHint.innerHTML = '向下滑动 <i class="fas fa-arrow-down"></i>';
+            } else if (currentPage === totalPages - 1) {
+                verticalHint.style.opacity = '0.8';
+                verticalHint.innerHTML = '向上滑动 <i class="fas fa-arrow-up"></i>';
+            } else {
+                verticalHint.style.opacity = '0.6';
+                verticalHint.innerHTML = '上下滑动 <i class="fas fa-arrows-alt-v"></i>';
+            }
+        }
+        
+        // 页面切换动画函数
+        function animatePageTransition(fromPage, toPage) {
+            fromPage.classList.remove('active');
+            fromPage.classList.add('inactive');
+            
+            setTimeout(() => {
+                toPage.classList.remove('inactive');
+                toPage.classList.add('active');
+            }, 300);
+        }
+        
+        // 切换页面函数
+        function goToPage(pageIndex) {
+            if (isAnimating || currentPage === pageIndex || pageIndex < 0 || pageIndex >= totalPages) return;
+            
+            isAnimating = true;
+            const prevPage = currentPage;
+            currentPage = pageIndex;
+            
+            // 执行页面切换动画
+            animatePageTransition(pageElements[prevPage], pageElements[pageIndex]);
+            
+            // 移动页面容器
+            pagesContainer.style.transform = `translateY(-${pageIndex * (100/totalPages)}%)`;
+            
+            // 更新指示器
+            updateIndicator();
+            
+            // 动画结束后重置标志
+            setTimeout(() => {
+                isAnimating = false;
+            }, 800);
+        }
+        
+        // 开启邀请函按钮点击事件
+        openInvitationBtn.addEventListener('click', () => {
+            goToPage(1);
+        });
+        
+        // 确认出席按钮点击事件
+        confirmBtn.addEventListener('click', () => {
+            // 创建确认弹窗
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 100;
+                animation: fadeIn 0.3s ease;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: rgba(255, 253, 248, 0.95); 
+                         padding: 40px 30px; 
+                         border-radius: 25px; 
+                         max-width: 350px; 
+                         text-align: center;
+                         border: 1px solid rgba(212, 175, 55, 0.2);
+                         box-shadow: 0 15px 40px rgba(139, 115, 85, 0.25);
+                         animation: scaleIn 0.4s ease;
+                         backdrop-filter: blur(5px);">
+                    <h3 style="color: #b8941f; margin-bottom: 20px; font-size: 1.8rem;">
+                        <i class="fas fa-check-circle" style="color: #d4af37; margin-right: 10px;"></i>确认成功
+                    </h3>
+                    <p style="color: #8b7355; line-height: 1.6; margin-bottom: 30px;">
+                        感谢您确认出席！我们已收到您的回复，期待与您一起为静静庆祝生日。<br><br>
+                        活动详情将通过短信发送给您，请注意查收。
+                    </p>
+                    <button id="closeModal" style="padding: 12px 30px; 
+                            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%); 
+                            color: #fff; 
+                            border: none; 
+                            border-radius: 50px; 
+                            font-weight: bold; 
+                            cursor: pointer;">
+                        确定
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // 关闭弹窗
+            document.getElementById('closeModal').addEventListener('click', () => {
+                modal.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => {
+                    document.body.removeChild(modal);
+                }, 300);
+            });
+        });
+        
+        // 添加CSS动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            @keyframes fadeOut {
+                from { opacity: 1; }
+                to { opacity: 0; }
+            }
+            @keyframes scaleIn {
+                from { transform: scale(0.8); opacity: 0; }
+                to { transform: scale(1); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // 触摸事件 - 上下滑动
+        document.querySelector('.vertical-swiper').addEventListener('touchstart', (e) => {
+            startY = e.touches[0].clientY;
+        });
+        
+        document.querySelector('.vertical-swiper').addEventListener('touchmove', (e) => {
+            e.preventDefault(); // 防止默认滚动
+        });
+        
+        document.querySelector('.vertical-swiper').addEventListener('touchend', (e) => {
+            endY = e.changedTouches[0].clientY;
+            handleVerticalSwipe();
+        });
+        
+        function handleVerticalSwipe() {
+            const swipeThreshold = 50; // 滑动阈值
+            
+            if (startY - endY > swipeThreshold && currentPage < totalPages - 1) {
+                // 向上滑动，切换到下一页
+                goToPage(currentPage + 1);
+            } else if (endY - startY > swipeThreshold && currentPage > 0) {
+                // 向下滑动，切换到上一页
+                goToPage(currentPage - 1);
+            }
+        }
+        
+        // 鼠标滚轮事件
+        document.querySelector('.vertical-swiper').addEventListener('wheel', (e) => {
+            e.preventDefault();
+            
+            if (isAnimating) return;
+            
+            if (e.deltaY > 0 && currentPage < totalPages - 1) {
+                // 向下滚动，切换到下一页
+                goToPage(currentPage + 1);
+            } else if (e.deltaY < 0 && currentPage > 0) {
+                // 向上滚动，切换到上一页
+                goToPage(currentPage - 1);
+            }
+        });
+        
+        // 键盘支持
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' && currentPage < totalPages - 1) {
+                goToPage(currentPage + 1);
+            } else if (e.key === 'ArrowUp' && currentPage > 0) {
+                goToPage(currentPage - 1);
+            }
+        });
+        
+        // 初始化指示器
+        updateIndicator();
+    </script>
+</body>
+</html>
